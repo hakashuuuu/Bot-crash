@@ -106,11 +106,15 @@ def crash_server(message):
     )
     markup.add(parar_button)
 
-    bot.send_message(
-        message.chat.id,
-        f"Ataque iniciado para {ip_porta} com potência {potencia} por {tempo} segundos.",
-        reply_markup=markup
-    )
+    try:
+        bot.send_message(
+            message.chat.id,
+            f"Ataque iniciado para {ip_porta} com potência {potencia} por {tempo} segundos.",
+            reply_markup=markup
+        )
+    except Exception as e:
+        bot.send_message(message.chat.id, "Erro ao iniciar ataque.")
+        print(f"Erro ao enviar mensagem: {e}")
 
 # Manipulador de callback para parar ataques
 @bot.callback_query_handler(func=lambda call: call.data.startswith("parar_"))
@@ -160,8 +164,6 @@ def admin_commands(message):
             bot.send_message(message.chat.id, f"Usuário {usuario_id} removido com sucesso.")
         else:
             bot.send_message(message.chat.id, "Usuário não encontrado na lista de autorizados.")
-            
-            from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 
 # Comando /meuid
 @bot.message_handler(commands=['meuid'])
@@ -189,7 +191,7 @@ def list_users(message):
 
 # Função principal
 def main():
-    bot.polling(none_stop=True)
+    bot.polling(none_stop=True, timeout=60, long_polling_timeout=30)
 
 if __name__ == "__main__":
     main()
