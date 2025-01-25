@@ -50,7 +50,8 @@ Comandos disponíveis:
 
 🔹 /menu - Mostra este menu.
 
-🔹 /crash <IP:PORTA> [tempo] - Inicia um ataque na partida por determinado tempo com potência padrão 10 (se tempo não for especificado, será 900 segundos).
+🔹 /crash <IP da partida> [tempo] - Inicia um ataque na partida por determinado tempo com potência padrão 10 (se tempo não for especificado, será 900 segundos).
+
 🔹 /meuid - Mostra seu id de usuário do telegram.
 
 🔹 /adduser <ID> - Adiciona um usuário autorizado (apenas para o dono).
@@ -58,6 +59,9 @@ Comandos disponíveis:
 🔹 /removeuser <ID> - Remove um usuário autorizado (apenas para o dono).
 
 🔹 /listusers - Lista os usuários autorizados (apenas para o dono).
+
+Deseja comprar o bot?
+Fale com o @werbert_ofc
 """
     bot.send_message(message.chat.id, comandos)
 
