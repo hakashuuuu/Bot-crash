@@ -49,9 +49,14 @@ def menu(message):
 Comandos disponíveis:
 
 🔹 /menu - Mostra este menu.
+
 🔹 /crash <IP:PORTA> [tempo] - Inicia um ataque na partida por determinado tempo com potência padrão 10 (se tempo não for especificado, será 900 segundos).
+🔹 /meuid - Mostra seu id de usuário do telegram.
+
 🔹 /adduser <ID> - Adiciona um usuário autorizado (apenas para o dono).
+
 🔹 /removeuser <ID> - Remove um usuário autorizado (apenas para o dono).
+
 🔹 /listusers - Lista os usuários autorizados (apenas para o dono).
 """
     bot.send_message(message.chat.id, comandos)
@@ -155,6 +160,19 @@ def admin_commands(message):
             bot.send_message(message.chat.id, f"Usuário {usuario_id} removido com sucesso.")
         else:
             bot.send_message(message.chat.id, "Usuário não encontrado na lista de autorizados.")
+            
+            from telebot.types import ReplyKeyboardMarkup, KeyboardButton
+
+# Comando /meuid
+@bot.message_handler(commands=['meuid'])
+def enviar_meu_id(message):
+    # Criação de uma mensagem formatada com o ID
+    meu_id = f"`{message.from_user.id}`"  # Formata o ID em Markdown
+    bot.send_message(
+        message.chat.id,
+        f"Seu ID do Telegram é:\n{meu_id}\n\nClique no ID para copiá-lo!",
+        parse_mode="Markdown"
+    )
 
 # Comando /listusers
 @bot.message_handler(commands=['listusers'])
